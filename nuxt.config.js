@@ -1,9 +1,14 @@
-
+let env = require('dotenv').config()
 export default {
-  /*
-  ** Nuxt rendering mode
-  ** See https://nuxtjs.org/api/configuration-mode
-  */
+  server: {
+    port: 3000, // default: 3000
+    host: '127.0.0.1' // default: localhost
+  },
+
+/*
+** Nuxt rendering mode
+** See https://nuxtjs.org/api/configuration-mode
+*/
   mode: 'universal',
   /*
   ** Nuxt target
@@ -15,7 +20,7 @@ export default {
   ** See https://nuxtjs.org/api/configuration-head
   */
   head: {
-    title: process.env.npm_package_name || '',
+    title:'Snippet',
     meta: [
       { charset: 'utf-8' },
       { name: 'viewport', content: 'width=device-width, initial-scale=1' },
@@ -54,12 +59,41 @@ export default {
   modules: [
     // Doc: https://axios.nuxtjs.org/usage
     '@nuxtjs/axios',
+    '@nuxtjs/auth'
+
   ],
   /*
   ** Axios module configuration
   ** See https://axios.nuxtjs.org/options
   */
-  axios: {},
+  axios: {
+  baseURL : env.parsed.API_URL,
+  proxy: false
+
+  },
+
+  auth:{
+    strategies:{
+      local:{
+        endpoints:{
+          login:{
+            url: 'auth/login',
+            method: 'post',
+            propertyName: 'data.token'
+          },
+          user: {
+            url: 'auth/me',
+            method: 'get',
+            propertyName: 'data'
+          },
+          logout: {
+            url: 'auth/logout',
+            method: 'post',
+          }
+        }
+      }
+    }
+  },
   /*
   ** Build configuration
   ** See https://nuxtjs.org/api/configuration-build/
