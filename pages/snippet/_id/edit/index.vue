@@ -28,15 +28,20 @@
       <div class="flex lg:flex-no-wrap flex-wrap">
         <div class="w-full lg:w-8/12 lg:mr-16 flex flex-wrap lg:flex-no-wrap justify-between items-start mb-8 ">
           <div class="order-first ">
-            <nuxt-link class="block mb-s p-3 bg-blue-300 rounded-lg mr-2"
-                       :to="{}">
+            <stepNavigationOrder
+              :step="previousStep"
+            >
               <div class="fill-current text-white h-6" v-html="IconLeft"></div>
-            </nuxt-link>
-            <nuxt-link class="block mb-s p-3 bg-blue-300 rounded-lg mr-2 mt-2"
-                       title="Add step Before"
-                       :to="{}">
-              <div class="fill-current text-white h-6" v-html="IconPlus"></div>
-            </nuxt-link>
+            </stepNavigationOrder>
+            <addStepButton
+              :currentStep="currentStep"
+              :snippet="snippet"
+              @addNewStep="handleNewStep"
+              position="before"
+
+            >
+              <div class="fill-current text-white h-6 " v-html="IconPlus"></div>
+            </addStepButton>
           </div>
           <div class="w-full lg:mr-2">
             <textarea class=" text-gray-500 w-full border-gray-500 border-dashed border-2 border-lg"
@@ -49,15 +54,21 @@
             </div>
           </div>
           <div class="order-first flex flex-row lg:flex-col lg:order-last">
-            <nuxt-link class="block mb-s p-3 bg-blue-300 rounded-lg "
-                       :to="{}">
-              <div class="fill-current text-white h-6 " v-html="IconRight"></div>
-            </nuxt-link>
-            <nuxt-link class="block mb-s p-3 bg-blue-300 rounded-lg mt-2"
-                       title="Add step After"
-                       :to="{}">
+            <stepNavigationOrder
+              :step="nextStep"
+            >
+              <div class="fill-current text-white h-6" v-html="IconRight"></div>
+            </stepNavigationOrder>
+            <addStepButton
+            :currentStep="currentStep"
+            :snippet="snippet"
+            @addNewStep="handleNewStep"
+            position="after"
+
+            >
               <div class="fill-current text-white h-6 " v-html="IconPlus"></div>
-            </nuxt-link>
+
+            </addStepButton>
             <nuxt-link class="block mb-s p-3 bg-red-300 rounded-lg mt-2 lg:mr-0 mr-2 order-first lg:order-last"
                        title="Delete Snippet"
                        :to="{}">
@@ -71,14 +82,10 @@
               Steps
             </h1>
             <ul>
-              <li v-for="(step,index) in orderedStepsAsc " :key="index" class="mb-1">
-                <nuxt-link
-                  to="{}"
-                  :class="{'font-bold': currentStep.uuid === step.uuid}"
-                >
-                  {{ index + 1}}. {{ step.title }}
-                </nuxt-link>
-              </li>
+              <stepList
+              :steps="orderedStepsAsc"
+              :currentStep="currentStep"
+              />
             </ul>
           </div>
           <div class="text-gray-500 text-sm">
@@ -94,8 +101,15 @@
 import feather from 'feather-icons'
 import { orderBy as _orderBy } from 'lodash'
 import { debounce as _debounce } from 'lodash'
+import stepList from "@/pages/snippet/_id/components/stepList";
+import stepNavigationOrder from "@/pages/snippet/_id/components/stepNavigationOrder";
+import browsSnippet from "@/mixins/snippet/browsSnippet";
+import addStepButton from "@/pages/snippet/_id/edit/addStepButton";
 export default {
   name: "index",
+  components:{
+    stepList,stepNavigationOrder,addStepButton
+  },
   async asyncData({ app, params}) {
     let snippet = await app.$axios.$get(`snippets/${params.id}`)
     return {
@@ -114,43 +128,37 @@ export default {
 
     }
   },
+  mixins: [
+    browsSnippet
+  ],
+  head(){
+    return {
+      title: `editing ${this.snippet.title}`
+    }
+  },
   watch: {
     'snippet.title': {
       handler: _debounce( async function (title){
-        await this.$axios.patch(`snippets/${this.snippet.uuid}`, {
+        await this.$axios.$patch(`snippets/${this.snippet.uuid}`, {
           title
         })
       },500)
+    },
+    'currentStep' : {
+      deep: true,
+      handler: _debounce(async function (step){
+        await this.$axios.$patch(`snippets/step/${step.uuid}`, {
+          title : step.title,
+           body : step.body
+        })
+      }, 500)
     }
   },
-  computed: {
-    orderedStepsAsc(){
-      return _orderBy (
-        this.steps , 'order','asc'
-      )
-    },
-
-    firstStep(){
-      return this.orderedStepsAsc[0]
-    },
-    currentStep() {
-      return this.orderedStepsAsc.find(
-        (e) => e.uuid === this.$route.query.step
-      ) ||  this.firstStep
-    },
-    IconLeft: function () {
-      return feather.toSvg(this.left)
-    },
-    IconRight: function () {
-      return feather.toSvg(this.right)
-    },
-    IconDelet: function () {
-      return feather.toSvg(this.delete)
-    },
-    IconPlus: function () {
-      return feather.toSvg(this.plus)
-    },
-  },
+  methods: {
+    handleNewStep(step) {
+      this.steps.push(step)
+    }
+  }
 }
 </script>
 
