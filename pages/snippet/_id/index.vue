@@ -10,7 +10,7 @@
           <div class="text-gray-700">
             <nuxt-link :to="{}">
               Created By
-              {{ $auth.user.name }}
+              {{ snippet.author.name }}
             </nuxt-link>
           </div>
         </div>
@@ -30,7 +30,11 @@
             </stepNavigationOrder>
           </div>
           <div class="bg-white p-8 rounded-lg text-gray-600 w-full lg:mr-2">
-            {{ currentStep.body}}
+            <AppStepMarkdown
+            :value="currentStep.body"
+            >
+            </AppStepMarkdown>
+
           </div>
           <div class="order-first flex flex-row lg:flex-col lg:order-last">
             <stepNavigationOrder
@@ -39,6 +43,7 @@
               <div class="fill-current text-white h-6" v-html="IconRight"></div>
             </stepNavigationOrder>
             <nuxt-link class="block mb-s p-3 bg-blue-300 rounded-lg mt-2 lg:mr-0 mr-2 order-first lg:order-last"
+                       v-if="snippet.owner"
                        title="Edit Snippet"
                        :to="{
                         name: 'snippet-id-edit',
@@ -76,6 +81,7 @@ import feather from 'feather-icons'
 import stepNavigationOrder from "@/pages/snippet/_id/components/stepNavigationOrder";
 import stepList from "@/pages/snippet/_id/components/stepList";
 import browsSnippet from "@/mixins/snippet/browsSnippet";
+import AppStepMarkdown from "@/components/global/snippet/AppStepMarkdown";
 
 import { orderBy as _orderBy } from 'lodash'
 export default {
@@ -102,7 +108,7 @@ export default {
     browsSnippet
   ],
   components:{
-   stepNavigationOrder,stepList
+   stepNavigationOrder,stepList,AppStepMarkdown
   },
 
 }

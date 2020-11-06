@@ -22,7 +22,8 @@ export default {
         name: 'snippet-id-edit', params: {id: snippet.data.uuid}
       })
 
-    }
+    },
+
   }
 }
 </script>

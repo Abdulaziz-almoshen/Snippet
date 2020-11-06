@@ -3,6 +3,7 @@
 @import "tailwindcss/components";
 
 @import "tailwindcss/utilities";
+@import "assets/style/codemirror.css";
 
 body {
   @apply bg-gray-100;
@@ -19,4 +20,14 @@ p {
 }
 .container{
   @apply w-10/12 mx-auto;
+}
+
+pre{
+  @apply break-all whitespace-pre-wrap;
+}
+code {
+  @apply bg-gray-100 p-1 rounded
+}
+.CodeMirror{
+  @apply font-sans text-base w-full max-w-lg border-dashed border-2 border-gray-500 mb-6
 }
